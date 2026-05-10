@@ -8,12 +8,18 @@
   @apply text-2xl font-bold tracking-tight text-white;
 }
 
+/* SVG container */
 .svg-container {
   @apply relative bg-gray-900 rounded-2xl p-4 border border-gray-700 w-full max-w-2xl flex flex-col items-center;
 }
 
-.svg-container svg {
-  @apply w-full;
+.coulomb-svg {
+  @apply w-full select-none;
+}
+
+.draggable {
+  cursor: ew-resize;
+  user-select: none;
 }
 
 .force-type-badge {
@@ -28,6 +34,7 @@
   @apply bg-red-900 text-red-300;
 }
 
+/* LaTeX box */
 .latex-box {
   @apply bg-gray-900 border border-gray-700 rounded-xl px-6 py-4 w-full max-w-2xl overflow-x-auto;
 }
@@ -36,6 +43,7 @@
   @apply text-white;
 }
 
+/* Controls grid */
 .controls-grid {
   @apply grid grid-cols-3 gap-4 w-full max-w-2xl;
 }
@@ -48,14 +56,39 @@
   @apply text-sm font-semibold text-gray-400;
 }
 
-.charge-value {
-  @apply text-xl font-bold;
+/* Number input row */
+.number-input-row {
+  @apply flex items-center gap-1 w-full justify-center;
 }
 
-.distance-val {
+.number-input {
+  @apply w-20 bg-gray-800 border border-gray-600 rounded-lg px-2 py-1
+    text-center text-lg font-bold text-white
+    focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400
+    transition-colors;
+  /* remove spinners */
+  -moz-appearance: textfield;
+}
+
+.number-input::-webkit-outer-spin-button,
+.number-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.distance-input {
+  @apply focus:border-yellow-400;
+}
+
+.unit {
+  @apply text-sm font-semibold text-gray-400;
+}
+
+.dist-unit {
   @apply text-yellow-400;
 }
 
+/* Slider */
 .slider {
   @apply w-full accent-yellow-400 cursor-pointer;
 }
@@ -64,8 +97,14 @@
   @apply flex justify-between w-full text-xs text-gray-500;
 }
 
+.drag-hint {
+  @apply text-xs text-gray-600 text-center mt-1;
+}
+
+/* Options bar */
 .options-bar {
-  @apply flex flex-wrap items-center justify-between gap-4 w-full max-w-2xl bg-gray-900 border border-gray-700 rounded-xl px-5 py-3;
+  @apply flex flex-wrap items-center justify-between gap-4 w-full max-w-2xl
+    bg-gray-900 border border-gray-700 rounded-xl px-5 py-3;
 }
 
 .option-label {
