@@ -1,6 +1,5 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import katex from 'katex';
 
 @Injectable({ providedIn: 'root' })
 export class LatexRendererService {
@@ -8,6 +7,8 @@ export class LatexRendererService {
 
   render(element: HTMLElement, latex: string): void {
     if (!this.isBrowser) return;
-    katex.render(latex, element, { throwOnError: false, displayMode: true });
+    import('katex').then(({ default: katex }) => {
+      katex.render(latex, element, { throwOnError: false, displayMode: true });
+    });
   }
 }

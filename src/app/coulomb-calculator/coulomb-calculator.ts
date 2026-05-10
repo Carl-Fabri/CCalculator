@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CoulombStateService } from './services/coulomb-state.service';
-import { CoulombLayoutService, SVG_W, SVG_H, CHARGE_R, AXIS_Y, Q2_MIN_X, Q2_MAX_X } from './services/coulomb-layout.service';
+import { CoulombLayoutService, SVG_W, SVG_H, CHARGE_R, AXIS_Y } from './services/coulomb-layout.service';
 import { LatexRendererService } from './services/latex-renderer.service';
 
 @Component({
@@ -24,12 +24,13 @@ export class CoulombCalculator implements AfterViewChecked {
   readonly layout = inject(CoulombLayoutService);
   private readonly latexRenderer = inject(LatexRendererService);
 
-  // SVG constants exposed to the template
   readonly svgWidth = SVG_W;
   readonly svgHeight = SVG_H;
   readonly chargeRadius = CHARGE_R;
   readonly centerY = AXIS_Y;
 
+  private dragging: 'q1' | 'q2' | null = null;
+  isDraggingQ1 = false;
   isDraggingQ2 = false;
 
   @ViewChild('svgEl') private svgElRef!: ElementRef<SVGSVGElement>;
@@ -38,15 +39,22 @@ export class CoulombCalculator implements AfterViewChecked {
 
   // --- Drag handlers ---
 
+  onQ1MouseDown(event: MouseEvent | TouchEvent): void {
+    event.preventDefault();
+    this.dragging = 'q1';
+    this.isDraggingQ1 = true;
+  }
+
   onQ2MouseDown(event: MouseEvent | TouchEvent): void {
     event.preventDefault();
+    this.dragging = 'q2';
     this.isDraggingQ2 = true;
   }
 
   @HostListener('document:mousemove', ['$event'])
   @HostListener('document:touchmove', ['$event'])
   onDragMove(event: MouseEvent | TouchEvent): void {
-    if (!this.isDraggingQ2 || !this.svgElRef) return;
+    if (!this.dragging || !this.svgElRef) return;
     event.preventDefault();
 
     const clientX = event instanceof MouseEvent
@@ -55,13 +63,19 @@ export class CoulombCalculator implements AfterViewChecked {
 
     const rect = this.svgElRef.nativeElement.getBoundingClientRect();
     const svgX = (clientX - rect.left) * (SVG_W / rect.width);
-    const clamped = Math.max(Q2_MIN_X, Math.min(Q2_MAX_X, svgX));
-    this.state.setDistance(this.layout.svgXToDistance(clamped));
+
+    if (this.dragging === 'q1') {
+      this.layout.dragQ1(svgX);
+    } else {
+      this.layout.dragQ2(svgX);
+    }
   }
 
   @HostListener('document:mouseup')
   @HostListener('document:touchend')
   onDragEnd(): void {
+    this.dragging = null;
+    this.isDraggingQ1 = false;
     this.isDraggingQ2 = false;
   }
 

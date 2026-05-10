@@ -30,7 +30,7 @@
 
       <!-- Dashed connection between charges -->
       <line
-        [attr.x1]="layout.q1Pos.x"
+        [attr.x1]="layout.q1Pos().x"
         [attr.y1]="centerY"
         [attr.x2]="layout.q2Pos().x"
         [attr.y2]="centerY"
@@ -42,7 +42,7 @@
       <!-- Force arrows -->
       @if (state.force() > 0) {
         <line
-          [attr.x1]="layout.q1Pos.x + (state.isAttraction() ? chargeRadius : -chargeRadius)"
+          [attr.x1]="layout.q1Pos().x + (state.isAttraction() ? chargeRadius : -chargeRadius)"
           [attr.y1]="centerY - 20"
           [attr.x2]="layout.q1ArrowX2()"
           [attr.y2]="centerY - 20"
@@ -62,7 +62,7 @@
           [attr.marker-start]="state.isAttraction() ? 'url(#arr-left)' : null"
         />
         <text
-          [attr.x]="(layout.q1Pos.x + layout.q2Pos().x) / 2"
+          [attr.x]="(layout.q1Pos().x + layout.q2Pos().x) / 2"
           [attr.y]="centerY - 26"
           text-anchor="middle"
           fill="#fde68a"
@@ -72,24 +72,41 @@
 
       <!-- Distance label -->
       <text
-        [attr.x]="(layout.q1Pos.x + layout.q2Pos().x) / 2"
+        [attr.x]="(layout.q1Pos().x + layout.q2Pos().x) / 2"
         y="115"
         text-anchor="middle"
         fill="#9ca3af"
         font-size="9"
       >r = {{ state.distance() }} m</text>
 
-      <!-- q1 (fixed) -->
+      <!-- q1 (draggable) -->
       <circle
-        [attr.cx]="layout.q1Pos.x"
+        [attr.cx]="layout.q1Pos().x"
         [attr.cy]="centerY"
         [attr.r]="chargeRadius"
         [attr.fill]="state.q1Color()"
         fill-opacity="0.85"
-        stroke="white"
-        stroke-width="1.5"
+        [attr.stroke]="isDraggingQ1 ? '#facc15' : 'white'"
+        [attr.stroke-width]="isDraggingQ1 ? 3 : 1.5"
+        class="draggable"
+        (mousedown)="onQ1MouseDown($event)"
+        (touchstart)="onQ1MouseDown($event)"
       />
-      <text [attr.x]="layout.q1Pos.x" [attr.y]="centerY + 5" text-anchor="middle" fill="white" font-size="13" font-weight="bold">q₁</text>
+      <text
+        [attr.x]="layout.q1Pos().x"
+        [attr.y]="centerY + 5"
+        text-anchor="middle"
+        fill="white"
+        font-size="13"
+        font-weight="bold"
+        class="draggable"
+        (mousedown)="onQ1MouseDown($event)"
+        (touchstart)="onQ1MouseDown($event)"
+      >q₁</text>
+
+      @if (!isDraggingQ1) {
+        <text [attr.x]="layout.q1Pos().x" [attr.y]="centerY + 47" text-anchor="middle" fill="#6b7280" font-size="8">↔ arrastrar</text>
+      }
 
       <!-- q2 (draggable) -->
       <circle
