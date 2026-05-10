@@ -1,0 +1,202 @@
+<div class="calculator-wrapper">
+  <h1 class="title">Calculadora — Ley de Coulomb</h1>
+
+  <!-- SVG Visualization -->
+  <div class="svg-container">
+    <svg [attr.width]="svgWidth" [attr.height]="svgHeight" viewBox="0 0 600 160">
+      <!-- Axis line -->
+      <line x1="20" y1="80" x2="580" y2="80" stroke="#4b5563" stroke-width="2" />
+
+      <!-- Tick marks -->
+      @for (i of [0,1,2,3,4,5,6,7,8,9,10]; track i) {
+        <line
+          [attr.x1]="20 + i * 56"
+          y1="75"
+          [attr.x2]="20 + i * 56"
+          y2="85"
+          stroke="#6b7280"
+          stroke-width="1"
+        />
+        <text
+          [attr.x]="20 + i * 56"
+          y="98"
+          text-anchor="middle"
+          fill="#9ca3af"
+          font-size="10"
+        >{{ i }}</text>
+      }
+
+      <!-- Connection line between charges -->
+      <line
+        [attr.x1]="q1Pos().x"
+        [attr.y1]="centerY"
+        [attr.x2]="q2Pos().x"
+        [attr.y2]="centerY"
+        stroke="#6b7280"
+        stroke-width="1"
+        stroke-dasharray="4 3"
+      />
+
+      <!-- Force arrows -->
+      @if (force() > 0) {
+        <!-- q1 arrow -->
+        <defs>
+          <marker id="arrowhead-right" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#facc15" />
+          </marker>
+          <marker id="arrowhead-left" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
+            <polygon points="8 0, 0 3, 8 6" fill="#facc15" />
+          </marker>
+        </defs>
+
+        <!-- q1 force arrow -->
+        <line
+          [attr.x1]="q1Pos().x + (isAttraction() ? chargeRadius : -chargeRadius)"
+          [attr.y1]="centerY - 18"
+          [attr.x2]="q1ArrowX2()"
+          [attr.y2]="centerY - 18"
+          stroke="#facc15"
+          stroke-width="2"
+          [attr.marker-end]="isAttraction() ? 'url(#arrowhead-right)' : null"
+          [attr.marker-start]="!isAttraction() ? 'url(#arrowhead-left)' : null"
+        />
+
+        <!-- q2 force arrow -->
+        <line
+          [attr.x1]="q2Pos().x + (isAttraction() ? -chargeRadius : chargeRadius)"
+          [attr.y1]="centerY - 18"
+          [attr.x2]="q2ArrowX2()"
+          [attr.y2]="centerY - 18"
+          stroke="#facc15"
+          stroke-width="2"
+          [attr.marker-end]="!isAttraction() ? 'url(#arrowhead-right)' : null"
+          [attr.marker-start]="isAttraction() ? 'url(#arrowhead-left)' : null"
+        />
+      }
+
+      <!-- Charge q1 -->
+      <circle
+        [attr.cx]="q1Pos().x"
+        [attr.cy]="centerY"
+        [attr.r]="chargeRadius"
+        [attr.fill]="q1Color()"
+        fill-opacity="0.85"
+        stroke="white"
+        stroke-width="1.5"
+      />
+      <text
+        [attr.x]="q1Pos().x"
+        [attr.y]="centerY + 5"
+        text-anchor="middle"
+        fill="white"
+        font-size="13"
+        font-weight="bold"
+      >q₁</text>
+
+      <!-- Charge q2 -->
+      <circle
+        [attr.cx]="q2Pos().x"
+        [attr.cy]="centerY"
+        [attr.r]="chargeRadius"
+        [attr.fill]="q2Color()"
+        fill-opacity="0.85"
+        stroke="white"
+        stroke-width="1.5"
+      />
+      <text
+        [attr.x]="q2Pos().x"
+        [attr.y]="centerY + 5"
+        text-anchor="middle"
+        fill="white"
+        font-size="13"
+        font-weight="bold"
+      >q₂</text>
+
+      <!-- Force label above q1 arrow -->
+      @if (force() > 0) {
+        <text
+          [attr.x]="(q1Pos().x + q1ArrowX2()) / 2"
+          [attr.y]="centerY - 24"
+          text-anchor="middle"
+          fill="#fde68a"
+          font-size="9"
+        >F = {{ force().toFixed(3) }} N</text>
+      }
+    </svg>
+
+    <!-- Attraction/Repulsion label -->
+    <div class="force-type-badge" [class.attraction]="isAttraction()" [class.repulsion]="!isAttraction()">
+      {{ isAttraction() ? 'Atracción' : 'Repulsión' }}
+    </div>
+  </div>
+
+  <!-- LaTeX formula display -->
+  <div class="latex-box">
+    <div #katexEl class="katex-render"></div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls-grid">
+    <!-- Carga 1 -->
+    <div class="charge-card q1-card">
+      <h2>Carga 1 (q₁)</h2>
+      <div class="charge-value" [style.color]="q1Color()">{{ q1() > 0 ? '+' : '' }}{{ q1() }} μC</div>
+      <input
+        type="range"
+        min="-10"
+        max="10"
+        step="0.5"
+        [ngModel]="q1()"
+        (ngModelChange)="q1.set(+$event)"
+        class="slider"
+      />
+      <div class="range-labels"><span>−10</span><span>0</span><span>+10</span></div>
+    </div>
+
+    <!-- Distancia -->
+    <div class="charge-card distance-card">
+      <h2>Distancia (r)</h2>
+      <div class="charge-value distance-val">{{ distance() }} m</div>
+      <input
+        type="range"
+        min="0.1"
+        max="10"
+        step="0.1"
+        [ngModel]="distance()"
+        (ngModelChange)="distance.set(+$event)"
+        class="slider"
+      />
+      <div class="range-labels"><span>0.1</span><span>5</span><span>10</span></div>
+    </div>
+
+    <!-- Carga 2 -->
+    <div class="charge-card q2-card">
+      <h2>Carga 2 (q₂)</h2>
+      <div class="charge-value" [style.color]="q2Color()">{{ q2() > 0 ? '+' : '' }}{{ q2() }} μC</div>
+      <input
+        type="range"
+        min="-10"
+        max="10"
+        step="0.5"
+        [ngModel]="q2()"
+        (ngModelChange)="q2.set(+$event)"
+        class="slider"
+      />
+      <div class="range-labels"><span>−10</span><span>0</span><span>+10</span></div>
+    </div>
+  </div>
+
+  <!-- Options -->
+  <div class="options-bar">
+    <label class="option-label">
+      <input type="checkbox" [ngModel]="showScientific()" (ngModelChange)="showScientific.set($event)" />
+      Notación Científica (LaTeX)
+    </label>
+
+    <!-- Force result display -->
+    <div class="force-result">
+      <span class="force-label">Fuerza:</span>
+      <span class="force-value">{{ force().toFixed(4) }} N</span>
+    </div>
+  </div>
+</div>

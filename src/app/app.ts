@@ -1,12 +1,9 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component } from '@angular/core';
+import { CoulombCalculator } from './coulomb-calculator/coulomb-calculator';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  imports: [CoulombCalculator],
+  template: `<app-coulomb-calculator />`,
 })
-export class App {
-  protected readonly title = signal('CCalculator');
-}
+export class App {}
